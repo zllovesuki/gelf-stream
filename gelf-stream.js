@@ -19,7 +19,7 @@ function GelfStream(host, port, options) {
   Writable.call(this, {objectMode: true})
 
   this._options = options
-  this._client = gelfing(host, port, options);
+  this._client = gelfling(host, port, options);
 
   this.once('finish', this.destroy)
 }
