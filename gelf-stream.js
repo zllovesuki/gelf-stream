@@ -1,5 +1,6 @@
 var gelfStream = exports
-var gelfling   = require('gelfling')
+var gelf   = require('gelf-pro')
+var gelfling = require('gelfling')
 var util       = require('util')
 var Writable   = require('stream').Writable
 
@@ -19,7 +20,17 @@ function GelfStream(host, port, options) {
   Writable.call(this, {objectMode: true})
 
   this._options = options
-  this._client = gelfling(host, port, options)
+
+  gelf.setConfig({
+	  adapterName: 'tcp',
+	  adapterOptions: {
+		  family: 4,
+		  host: host,
+		  port: port
+	  }
+  });
+
+  this._client = gelf;
 
   this.once('finish', this.destroy)
 }
@@ -27,7 +38,8 @@ util.inherits(GelfStream, Writable)
 
 GelfStream.prototype._write = function(chunk, encoding, callback) {
   if (!this._options.filter || this._options.filter(chunk)) {
-    this._client.send(this._options.map ? this._options.map(chunk) : chunk, callback)
+	  chunk = this._options.map ? this._options.map(chunk) : chunk;
+    this._client.send(JSON.stringify(chunk), callback)
   } else {
     callback()
   }
@@ -76,6 +88,7 @@ function flatten(obj, into, prefix, sep) {
 }
 
 function bunyanToGelf(log) {
+	console.log(log);
   /*jshint camelcase:false */
   var errFile, key,
       ignoreFields = ['hostname', 'time', 'msg', 'name', 'level', 'v'],
@@ -83,7 +96,7 @@ function bunyanToGelf(log) {
       gelfMsg = {
         host:          log.hostname,
         timestamp:     +new Date(log.time) / 1000,
-        short_message: log.msg,
+        short_message: log.msg ? log.msg : (log.message ? log.message : 'No short message'),
         facility:      log.name,
         level:         mapGelfLevel(log.level),
         full_message:  JSON.stringify(log, null, 2)
@@ -99,6 +112,8 @@ function bunyanToGelf(log) {
     if (ignoreFields.indexOf(key) < 0 && gelfMsg[key] == null)
       gelfMsg[key] = flattenedLog[key]
   }
+
+  console.log(gelfMsg);
 
   return gelfMsg
 }
