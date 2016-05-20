@@ -88,7 +88,6 @@ function flatten(obj, into, prefix, sep) {
 }
 
 function bunyanToGelf(log) {
-	console.log(log);
   /*jshint camelcase:false */
   var errFile, key,
       ignoreFields = ['hostname', 'time', 'msg', 'name', 'level', 'v'],
@@ -112,8 +111,6 @@ function bunyanToGelf(log) {
     if (ignoreFields.indexOf(key) < 0 && gelfMsg[key] == null)
       gelfMsg[key] = flattenedLog[key]
   }
-
-  console.log(gelfMsg);
 
   return gelfMsg
 }
