@@ -17,7 +17,6 @@
   },
   "license": "MIT",
   "dependencies": {
-    "gelf-pro": "^0.7.0",
     "gelfling": "^0.3.0"
   },
   "devDependencies": {

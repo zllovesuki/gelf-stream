@@ -1,5 +1,4 @@
 var gelfStream = exports
-var gelf   = require('gelf-pro')
 var gelfling = require('gelfling')
 var util       = require('util')
 var Writable   = require('stream').Writable
@@ -20,17 +19,7 @@ function GelfStream(host, port, options) {
   Writable.call(this, {objectMode: true})
 
   this._options = options
-
-  gelf.setConfig({
-	  adapterName: 'tcp',
-	  adapterOptions: {
-		  family: 4,
-		  host: host,
-		  port: port
-	  }
-  });
-
-  this._client = gelf;
+  this._client = gelfing(host, port, options);
 
   this.once('finish', this.destroy)
 }
