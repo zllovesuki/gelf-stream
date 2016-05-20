@@ -1,4 +1,5 @@
 var gelfStream = exports
+var gelf   = require('gelf-pro')
 var gelfling = require('gelfling')
 var util       = require('util')
 var Writable   = require('stream').Writable
@@ -19,7 +20,20 @@ function GelfStream(host, port, options) {
   Writable.call(this, {objectMode: true})
 
   this._options = options
-  this._client = gelfling(host, port, options);
+
+  if (!!this._options.tcp) {
+	  gelf.setConfig({
+		  adapterName: 'tcp',
+		  adapterOptions: {
+			  family: 4,
+			  host: host,
+			  port: port
+		  }
+	  })
+	  this._client = gelf
+  }else{
+	  this._client = gelfing(host, port, options)
+  }
 
   this.once('finish', this.destroy)
 }
@@ -28,7 +42,10 @@ util.inherits(GelfStream, Writable)
 GelfStream.prototype._write = function(chunk, encoding, callback) {
   if (!this._options.filter || this._options.filter(chunk)) {
 	  chunk = this._options.map ? this._options.map(chunk) : chunk;
-    this._client.send(JSON.stringify(chunk), callback)
+	  if (!!this._options.tcp) {
+		  chunk = JSON.stringify(chunk);
+	  }
+	  this._client.send(chunk, callback);
   } else {
     callback()
   }
