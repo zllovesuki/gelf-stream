@@ -32,7 +32,7 @@ function GelfStream(host, port, options) {
 	  })
 	  this._client = gelf
   }else{
-	  this._client = gelfing(host, port, options)
+	  this._client = gelfling(host, port, options)
   }
 
   this.once('finish', this.destroy)
